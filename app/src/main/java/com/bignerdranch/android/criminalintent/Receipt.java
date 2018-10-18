@@ -10,6 +10,8 @@ public class Receipt {
     private Date mDate;
     private boolean mSolved;
     private String mLocation;
+    private double mLatitude;
+    private double mLongitude;
 
     public Receipt() {
         this(UUID.randomUUID());
@@ -52,9 +54,9 @@ public class Receipt {
         return mLocation;
     }
 
-    //public float getLongitude(){return mLongitude; }
+    public double getLongitude(){return mLongitude; }
 
-    //public float getLatitude(){return mLatitude; }
+    public double getLatitude(){return mLatitude; }
 
     public void setLocation(String location) {
         mLocation = location;
@@ -62,6 +64,14 @@ public class Receipt {
 
     public String getPhotoFilename() {
         return "IMG_" + getId().toString() + ".jpg";
+    }
+
+    public void setLatitude(double latitude) {
+        mLatitude = latitude;
+    }
+
+    public void setLongitude(double longitude) {
+        mLongitude = longitude;
     }
 }
 

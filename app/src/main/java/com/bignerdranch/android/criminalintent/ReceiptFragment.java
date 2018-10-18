@@ -6,16 +6,20 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,11 +29,19 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.location.LocationProvider;
+
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.GoogleMap;
 
 import java.io.File;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.jar.Manifest;
 
 import static android.widget.CompoundButton.*;
 
@@ -37,10 +49,13 @@ public class ReceiptFragment extends Fragment {
 
     private static final String ARG_CRIME_ID = "crime_id";
     private static final String DIALOG_DATE = "DialogDate";
+    private static final String EXTRA_LATITUDE = "Latitude";
+    private static final String EXTRA_LONGITUDE = "Longitude";
 
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_CONTACT = 1;
     private static final int REQUEST_PHOTO = 2;
+    private static final float REQUEST_lOCATION = 3;
 
     private Receipt mReceipt;
     private File mPhotoFile;
@@ -51,6 +66,8 @@ public class ReceiptFragment extends Fragment {
     private Button mLocationButton;
     private ImageButton mPhotoButton;
     private ImageView mPhotoView;
+    private GoogleApiClient mClient;
+    private Button mShowMapButton;
 
 
     public static ReceiptFragment newInstance(UUID crimeId) {
@@ -68,6 +85,48 @@ public class ReceiptFragment extends Fragment {
         UUID crimeId = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
         mReceipt = ReceiptLab.get(getActivity()).getCrime(crimeId);
         mPhotoFile = ReceiptLab.get(getActivity()).getPhotoFile(mReceipt);
+
+        mClient = new GoogleApiClient.Builder(getActivity())
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks(){
+                    @Override
+                    public void onConnected(@Nullable Bundle bundle){
+                        LocationRequest request = LocationRequest.create();
+                        request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                        request.setNumUpdates(1);
+                        request.setInterval(0);
+
+                        if(ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION)
+                                != PackageManager.PERMISSION_GRANTED){
+                            return;
+                        }
+                        LocationServices.FusedLocationApi.requestLocationUpdates(mClient, request, new LocationListener() {
+                            @Override
+                            public void onLocationChanged(Location location) {
+                                mReceipt.setLatitude(location.getLatitude());
+                                mReceipt.setLongitude(location.getLongitude());
+                                Log.i("LOCATION", "Got a fix: " + location);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int i){
+                    }
+                })
+                .build();
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        mClient.connect();
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        mClient.disconnect();
     }
 
     @Override
@@ -178,6 +237,28 @@ public class ReceiptFragment extends Fragment {
         mPhotoView = (ImageView) v.findViewById(R.id.crime_photo);
         updatePhotoView();
 
+        mShowMapButton = (Button) v.findViewById(R.id.receipt_location);
+        mShowMapButton.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View view) {
+                // create intent specifying the activity we want to use + latitude and longitude as extras
+                // startActivity (intent)
+
+                //Intent map = new Intent (Intent.ACTION_SEND);
+                Intent map = new Intent(getActivity(), MapsActivity.class);
+                map.setType("text/plain");
+                //map.putExtra(Intent.EXTRA_TEXT, getReport());
+                map.putExtra(EXTRA_LONGITUDE,
+                        getString(R.string.longitude_text));
+                map.putExtra(EXTRA_LATITUDE,
+                       getString(R.string.latitude_text));
+                //map = Intent.createChooser(map, getString(R.string.receipt_location_text));
+                startActivity(map);
+            }
+        });
+
+
         return v;
     }
 
@@ -234,7 +315,10 @@ public class ReceiptFragment extends Fragment {
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
             updatePhotoView();
+        //}else if (requestCode == REQUEST_lOCATION ){
+          //  Location location = (Location) mLocationButton
         }
+
     }
 
     private void updateDate() {
@@ -270,4 +354,6 @@ public class ReceiptFragment extends Fragment {
             mPhotoView.setImageBitmap(bitmap);
         }
     }
+
+
 }

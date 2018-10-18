@@ -105,6 +105,8 @@ public class ReceiptLab {
         values.put(DATE, receipt.getDate().getTime());
         values.put(SOLVED, receipt.isSolved() ? 1 : 0);
         values.put(CrimeTable.Cols.LOCATION, receipt.getLocation());
+        values.put(CrimeTable.Cols.LATITUDE, receipt.getLatitude());
+        values.put(CrimeTable.Cols.LONGITUDE, receipt.getLongitude());
 
         return values;
     }

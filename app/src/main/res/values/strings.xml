@@ -6,7 +6,7 @@
     <string name="receipt_comment_label">Comment</string>
     <string name="receipt_delete">Delete</string>
     <string name="receipt_details_label">Details</string>
-    <string name="receipt_solved_label">Solved</string>
+    <string name="receipt_solved_label">Paid</string>
     <string name="date_picker_title">Date of receipt:</string>
     <string name="new_receipt">New Receipt</string>
     <string name="show_subtitle">Show Subtitle</string>
@@ -17,12 +17,15 @@
     <string name="receipt_report">%1$s!
     The receipt was discovered on %2$s. %3$s, and %4$s
   </string>
-    <string name="receipt_report_solved">The case is solved</string>
-    <string name="receipt_report_unsolved">The case is not solved</string>
+    <string name="receipt_report_solved">The receipt is paid</string>
+    <string name="receipt_report_unsolved">The receipt is not paid</string>
     <string name="receipt_report_no_location">there is no location.</string>
     <string name="receipt_report_location">the location is %s.</string>
     <string name="receipt_report_subject">My Receipt Report</string>
     <string name="send_report">Send receipt report via</string>
     <string name="receipt_shop_name">Shop</string>
     <string name="receipt_shop_name_hint">Enter the name of the shop</string>
+    <string name="latitude_text">Lat: 0.0 </string>
+    <string name="longitude_text">Long: 0.0 </string>
+    <string name="title_activity_maps">Map</string>
 </resources>
